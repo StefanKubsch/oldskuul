@@ -1325,7 +1325,7 @@ Function SineText($Runtime)
 
 $MainWindow.Show()
 
-#IntroText
+IntroText
 
 # Mainloop
 
