@@ -12,13 +12,11 @@
 
 #region Define variables and constants / Preloading / PreCalc
 
-# Force to use Powershell 5.x and up.
-#Requires -Version 5.0
+# Force to use Powershell 5.1 and up.
+#Requires -Version 5.1
 
 # Force initialization of variables
 Set-StrictMode -Version "Latest"
-
-#Requires -Version 5.0
 
 # Loading used Namespaces / DLLs
 [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
@@ -78,7 +76,7 @@ $MainWindow 				= New-Object System.Windows.Forms.Form
 $MainWindow.Size 			= New-Object System.Drawing.Size(($MainWindowWidth+16),($MainWindowHeight+39))
 $MainWindow.FormBorderStyle = 'FixedSingle'
 $MainWindow.BackColor 		= $ClearColor
-$MainWindow.Text 			= ">_ps:oldskuul"
+$MainWindow.Text 			= ">_ps:oldskuul - press ESC to exit"
 
 #########################################################
 # Create GDI+ target from Windows Form and BoubleBuffer #
@@ -221,6 +219,9 @@ Function FPSCounter()
 	# Keyboardhandling and Exit on "ESC"
 	If ($GetKey::GetAsyncKeyState(27) -eq -32767) 
 	{
+		$AudioPlayer.Stop()
+		$AudioPlayer.Close()
+		$MainWindow.Close()
 		Exit
 	}
 	
@@ -538,17 +539,14 @@ Function FilledVectorCube($Runtime)
 		{
 			# x-rotation
 			$y = $CubeDef[$i][1]
-			
 			$CubeDef[$i][1] = $y * $CosA - $CubeDef[$i][2] * $SinA
 	
 			# y-rotation
 			$z = $CubeDef[$i][2] * $CosA + $y * $SinA
-			
-        	$CubeDef[$i][2] = $z * $CosA + $CubeDef[$i][0] * $SinA
+		   	$CubeDef[$i][2] = $z * $CosA + $CubeDef[$i][0] * $SinA
 
     		# z-rotation
 			$x = $CubeDef[$i][0] * $CosA - $z * $SinA
-			
 			$CubeDef[$i][0] = $x * $CosA - $CubeDef[$i][1] * $SinA
         	$CubeDef[$i][1] = $CubeDef[$i][1] * $CosA + $x * $SinA
 		
@@ -575,13 +573,8 @@ Function FilledVectorCube($Runtime)
 				}
 			}
 			
-			$t = $avgZ[$i]
-           	$avgZ[$i] = $avgZ[$Min]
-            $avgZ[$Min] = $t
-   	        
-			$t = $Order[$i]
-       	    $Order[$i] = $Order[$Min]
-           	$Order[$Min] = $t
+           	$avgZ[$i], $avgZ[$Min] = $avgZ[$Min], $avgZ[$i]
+   	        $Order[$i], $Order[$Min] = $Order[$Min], $Order[$i]
  	    }
 		
 		ForEach ($i in 0..$CubeNumFaces)
@@ -1121,23 +1114,15 @@ Function VectorBalls($Runtime)
 				}
 			}
 			
-      		$tX = $VectorBallsCoordX[$Min]
-      		$tY = $VectorBallsCoordY[$Min]
-      		$tZ = $VectorBallsCoordZ[$Min]
-			
-			$VectorBallsCoordX[$Min] = $VectorBallsCoordX[$i]
-        	$VectorBallsCoordY[$Min] = $VectorBallsCoordY[$i]
-        	$VectorBallsCoordZ[$Min] = $VectorBallsCoordZ[$i]
-			
-			$VectorBallsCoordX[$i] = $tX
-        	$VectorBallsCoordY[$i] = $tY
-        	$VectorBallsCoordZ[$i] = $tZ
+			$VectorBallsCoordX[$Min], $VectorBallsCoordX[$i] = $VectorBallsCoordX[$i], $VectorBallsCoordX[$Min]
+        	$VectorBallsCoordY[$Min], $VectorBallsCoordY[$i] = $VectorBallsCoordY[$i], $VectorBallsCoordY[$Min]
+        	$VectorBallsCoordZ[$Min], $VectorBallsCoordZ[$i] = $VectorBallsCoordZ[$i], $VectorBallsCoordZ[$Min]
 		}
 		
   		ForEach ($i in 0..$VectorBallsNum)
 		{
     		$Factor = ($VectorBallsCoordZ[$i] + 15)
-			$Buffer.DrawImage($VectorBallsBob,($VectorBallsCoordX[$i] * 2 * $Factor + 220) + 150,($VectorBallsCoordY[$i] * 2 * $Factor + 180) + 80,$Factor * 3,$Factor * 3)
+			$Buffer.DrawImage($VectorBallsBob, ($VectorBallsCoordX[$i] * 2 * $Factor + 220) + 150, ($VectorBallsCoordY[$i] * 2 * $Factor + 180) + 80, $Factor * 3, $Factor * 3)
 		}
 
   		$AngleX += 5
@@ -1248,8 +1233,6 @@ Function SineText($Runtime)
 	$StopTime = [System.Environment]::TickCount + $Runtime
 	
 	# Sine Text
-	$SineTextImageWidth 	= 800
-	$SineTextImageHeight	= 295
 	$SineTextSprite 		= @((0,120,120,120,120,0),(120,180,160,160,140,120),(120,160,160,160,140,120),(120,160,160,160,140,120),(120,140,140,140,140,120),(0,120,120,120,120,0))
 	$Text 					= @(("**** **** **** ***  **** **** ****"),
 		 		 				("*    *  * *    *  *  **   **  *   "),
@@ -1329,7 +1312,7 @@ IntroText
 
 # Mainloop
 
-For ($i = 0; $i -lt 1; ++$i)
+while ($true)
 {
 	Rasterbars(10000)				# Parallax Starfield, Rasterbars & Bouncing Logo
 	Plasma(10000)					# 3D Starfield, Plasma
