@@ -1248,23 +1248,23 @@ Function Landscape($Runtime)
 
 $MainWindow.Show()
 
-#IntroText
+IntroText
 
 # Mainloop
 
 while ($true)
 {
-	#Rasterbars(10000)				# Parallax Starfield, Rasterbars & Bouncing Logo
-	#Plasma(10000)					# 3D Starfield, Plasma
-	#SineScroller(10000)				# Parallax Starfield, Bobs and SineScroller
-	#FilledVectorCube(10000)			# 3D Starfield and FilledVectorCube
-	#Fire(10000)						# Parallax Starfield, Fire
-	#Rotozoomer(10000)				# 3D Starfield and RotoZoomer
-	#Metaballs(10000)				# Parallax Starfield, Metaballs 2D
+	Rasterbars(10000)				# Parallax Starfield, Rasterbars & Bouncing Logo
+	Plasma(10000)					# 3D Starfield, Plasma
+	SineScroller(10000)				# Parallax Starfield, Bobs and SineScroller
+	FilledVectorCube(10000)			# 3D Starfield and FilledVectorCube
+	Fire(10000)						# Parallax Starfield, Fire
+	Rotozoomer(10000)				# 3D Starfield and RotoZoomer
+	Metaballs(10000)				# Parallax Starfield, Metaballs 2D
 	Tunnel(10000)					# 3D Starfield, Tunnel
-	#Landscape(10000)				# Parallax Starfield, Landscape
-	#VectorBalls(10000)				# 3D Starfield, Vectorballs
-	#DotTunnel(10000)				# Parallax Starfield, DotTunnel
+	Landscape(10000)				# Parallax Starfield, Landscape
+	VectorBalls(10000)				# 3D Starfield, Vectorballs
+	DotTunnel(10000)				# Parallax Starfield, DotTunnel
 }
 
 #endregion
