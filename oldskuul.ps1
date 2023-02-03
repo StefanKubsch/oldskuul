@@ -18,6 +18,10 @@
 # Force initialization of variables
 Set-StrictMode -Version "Latest"
 
+$localScriptRoot = $PSScriptRoot
+
+$PSVersionTable.PSVersion
+
 # Loading used Namespaces / DLLs
 [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
@@ -34,12 +38,13 @@ Add-Type -AssemblyName PresentationCore
 # - Release (unlock memory)                   #
 # - SetPixel                                  #
 # - GetPixel                                  #
-# - Clear                                     #
 # - SetChunk (set pixel on block)             #
 #                                             #
 # can be compiled via script in .\ClassChunky #
 ###############################################
-Add-Type -Path '.\ClassChunky\ClassChunky.dll'
+$DLLPath = ".\ClassChunky\ClassChunky.dll"
+$FileName = Join-Path $localScriptRoot $DLLPath
+Add-Type -Path $FileName
 $Chunky = [Chunky]
 
 ########################
@@ -56,7 +61,6 @@ $GetKey = Add-Type -MemberDefinition $ImportGetAsyncKeyState -Name 'Win32' -Pass
 #####################
 # General variables #
 #####################
-$localScriptRoot = $PSScriptRoot
 Set-Variable MainWindowWidth -Option Constant -Value 800
 Set-Variable MainWindowHeight -Option Constant -Value 600
 
@@ -153,8 +157,8 @@ ForEach ($i in 0..($MaxStarsPX - 1))
 $StarBrush3D = New-Object Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(180,180,255))
 Set-Variable MaxStars3D -Option Constant -Value 128
 Set-Variable MaxDepth3D -Option Constant -Value 32
-Set-Variable OrgX3D -Option Constant -Value ($MainWindowWidth / 2)
-Set-Variable OrgY3D -Option Constant -Value ($MainWindowHeight / 2)
+Set-Variable OrgX3D -Option Constant -Value ($MainWindowWidth -shr 1)
+Set-Variable OrgY3D -Option Constant -Value ($MainWindowHeight -shr 1)
 $Stars3DX = @{}
 $Stars3DY = @{}
 $Stars3DZ = @{}
@@ -998,8 +1002,8 @@ Function DotTunnel($Runtime)
 	$DotTunnelRings 		= 40
 	$DotTunnelSpace 		= 8
 	$DotTunnelRadius 		= 1500
-	$DotTunnelCenterX		= $DotTunnelWidth / 2
-	$DotTunnelCenterY		= $DotTunnelHeight / 2
+	$DotTunnelCenterX		= $DotTunnelWidth -shr 1
+	$DotTunnelCenterY		= $DotTunnelHeight -shr 1
 	$DotTunnelRAD2DEG 		= 4 * [System.Math]::Atan(1) / 180
 	$DotTunnelMove 			= 0.0
 	$DotTunnelAdd 			= 0.06
@@ -1073,7 +1077,7 @@ Function VectorBalls($Runtime)
 
 	# Init Vectorballs
 	$VectorBallsBob 	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\VectorBall.png")
-	$VectorBallsNum 	= 47
+	Set-Variable VectorBallsNum -Option Constant -Value 47
 	$VectorBallsDefX   	= @(-9,-8,-5,-4,-3,-1,0,1,3,4,5,7,-9,-7,-5,-1,3,5,7,9,-9,-7,-5,-4,-1,0,3,4,5,7,8,9,-9,-7,-5,-1,3,9,-9,-8,-5,-4,-3,-1,0,1,3,9)
 	$VectorBallsDefY	= @(2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2)
 	$VectorBallsDefZ	= @(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
@@ -1093,14 +1097,18 @@ Function VectorBalls($Runtime)
 		$Buffer.DrawImage($Background,0,150)
 
 		# VectorBalls
-		$CosX = [System.Math]::Cos($AngleX / 128)
-		$SinX = [System.Math]::Sin($AngleX / 128)
+		$AngleXTemp = $AngleX / 128
+		$AngleYTemp = $AngleY / 128
+		$AngleZTemp = $AngleZ / 128
 
-		$CosY = [System.Math]::Cos($AngleY / 128)
-		$SinY = [System.Math]::Sin($AngleY / 128)
+		$CosX = [System.Math]::Cos($AngleXTemp)
+		$SinX = [System.Math]::Sin($AngleXTemp)
 
-		$CosZ = [System.Math]::Cos($AngleZ / 128)
-		$SinZ = [System.Math]::Sin($AngleZ / 128)
+		$CosY = [System.Math]::Cos($AngleYTemp)
+		$SinY = [System.Math]::Sin($AngleYTemp)
+
+		$CosZ = [System.Math]::Cos($AngleZTemp)
+		$SinZ = [System.Math]::Sin($AngleZTemp)
 
 		ForEach ($i in 0..$VectorBallsNum)
 		{
@@ -1159,19 +1167,19 @@ Function Landscape($Runtime)
 	$StopTime = [System.Environment]::TickCount + $Runtime
 
 	# Init Landscape
-	$LandscapeWidth 		= 800
-	$LandscapeHeight 		= 295
-	$LandscapeTextureSize  	= 127
-	$LandscapeHalfX 		= $LandscapeWidth / 2
-	$LandscapeHalfY 		= $LandscapeHeight / 2
+	Set-Variable LandscapeWidth -Option Constant -Value 800
+	Set-Variable LandscapeHeight -Option Constant -Value 295
+	Set-Variable LandscapeTextureSize -Option Constant -Value 127
+	Set-Variable LandscapeHalfX -Option Constant -Value ($LandscapeWidth -shr 1)
+	Set-Variable LandscapeHalfY -Option Constant -Value ($LandscapeHeight -shr 1)
+	Set-Variable YPos -Option Constant -Value 40
+	Set-Variable XOrigin -Option Constant -Value 64
+	Set-Variable ZOrigin -Option Constant -Value 64
 	$Landscapegfx 			= New-Object $Chunky($BufferBMP)
 	$LandIMG			 	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\Landscape.png")
 	$LandscapeTextureIMG	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\LandscapeTexture.png")
 	$LandscapeBrush		 	= New-Object Drawing.SolidBrush ("Black")
 	$LandscapeAngle 		= 0
-	$YPos 					= 40
-	$XOrigin 				= 64
-	$ZOrigin 				= 64
 
 	# Lock terrain & texture maps
 	$LandscapeTextureMap = New-Object $Chunky($LandscapeTextureIMG)
@@ -1197,9 +1205,10 @@ Function Landscape($Runtime)
 		{
 			$LandscapeAngle = 0
 		}
-
-		$XPos = 63 + (([int]([System.Math]::Cos($LandscapeAngle * 0.01) * 128) -shl 7) -shr 7)
-		$ZPos = 63 + (([int]([System.Math]::Sin($LandscapeAngle * 0.01) * 128) -shl 7) -shr 7)
+		
+		$LandscapeAngleTemp = $LandscapeAngle * 0.01
+		$XPos = 63 + (([int]([System.Math]::Cos($LandscapeAngleTemp) * 128) -shl 7) -shr 7)
+		$ZPos = 63 + (([int]([System.Math]::Sin($LandscapeAngleTemp) * 128) -shl 7) -shr 7)
 
 		If ($ZOrigin - $ZPos -gt 0)
 		{
@@ -1210,8 +1219,9 @@ Function Landscape($Runtime)
 			$Factor = 100 * ($PI + [System.Math]::Atan([single]($XOrigin - $XPos) / ($ZOrigin - $ZPos)))
 		}
 
-		$CosA = [int]([System.Math]::Cos($Factor * 0.01) * 128)
-		$SinA = [int]([System.Math]::Sin($Factor * 0.01) * 128)
+		$FactorTemp = $Factor * 0.01
+		$CosA = [int]([System.Math]::Cos($FactorTemp) * 128)
+		$SinA = [int]([System.Math]::Sin($FactorTemp) * 128)
 
 		ForEach ($x in 0..$LandscapeTextureSize)
  		{
