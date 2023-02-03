@@ -1205,7 +1205,7 @@ Function Landscape($Runtime)
 		{
 			$LandscapeAngle = 0
 		}
-		
+
 		$LandscapeAngleTemp = $LandscapeAngle * 0.01
 		$XPos = 63 + (([int]([System.Math]::Cos($LandscapeAngleTemp) * 128) -shl 7) -shr 7)
 		$ZPos = 63 + (([int]([System.Math]::Sin($LandscapeAngleTemp) * 128) -shl 7) -shr 7)
