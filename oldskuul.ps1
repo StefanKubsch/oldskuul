@@ -20,11 +20,11 @@ Set-StrictMode -Version "Latest"
 
 $localScriptRoot = $PSScriptRoot
 
-$PSVersionTable.PSVersion
-
 # Loading used Namespaces / DLLs
 [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+
+$PSVersionTable.PSVersion
 
 # PresentationCore needed for MediaPlayer object
 Add-Type -AssemblyName PresentationCore
@@ -32,15 +32,6 @@ Add-Type -AssemblyName PresentationCore
 ###############################################
 # Custom LockBits class for pixel get/set     #
 # ClassChunky.dll                             #
-#                                             #
-# Currently implemented :                     #
-# - Lock (reserve bitmap memory)              #
-# - Release (unlock memory)                   #
-# - SetPixel                                  #
-# - GetPixel                                  #
-# - SetChunk (set pixel on block)             #
-#                                             #
-# can be compiled via script in .\ClassChunky #
 ###############################################
 $DLLPath = ".\ClassChunky\ClassChunky.dll"
 $FileName = Join-Path $localScriptRoot $DLLPath
@@ -68,7 +59,7 @@ $ClearColor = [System.Drawing.Color]::FromArgb(12,6,63)
 # "WhiteLinePen" is used for drawing lines in parts not using the "Background" image
 $WhiteLinePen = New-Object System.Drawing.Pen White
 Set-Variable WhiteLinePen.Color -Option Constant -Value "White"
-Set-Variable WhiteLinePen.Width	-Option Constant -Value 5
+Set-Variable WhiteLinePen.Width	-Option Constant -Value 0f
 # Use System.Random function (.NET) since it´s a bit faster than the Get-Random cmdlet (Powershell)
 $Random = New-Object System.Random
 Set-Variable PI -Option Constant -Value 3.14
@@ -144,7 +135,7 @@ $StarsPXX 		= @{}
 $StarsPXY		= @{}
 $StarsPXZ		= @{}
 
-ForEach ($i in 0..($MaxStarsPX - 1))
+For ($i=0; $i -lt $MaxStarsPX; $i++)
 {
 	$StarsPXX[$i] = $Random.Next(0, $MainWindowWidth)
   	$StarsPXY[$i] = $Random.Next(0, $MainWindowHeight)
@@ -163,7 +154,7 @@ $Stars3DX = @{}
 $Stars3DY = @{}
 $Stars3DZ = @{}
 
-ForEach ($i in 0..($MaxStars3D - 1))
+For ($i=0; $i -lt $MaxStars3D; $i++)
 {
 	$Stars3DX[$i] = $Random.Next(-25,25)
 	$Stars3DY[$i] = $Random.Next(-25,25)
@@ -188,7 +179,7 @@ Set-Variable FPSPosY -Option Constant -Value ($MainWindowHeight - 20)
 
 Function ParallaxStarfield()
 {
-	ForEach ($i in 0..($MaxStarsPX - 1))
+	For ($i=0; $i -lt $MaxStarsPX; $i++)
 	{
 		$StarsPXX[$i] += $StarsPXZ[$i]
 		If ($StarsPXX[$i] -ge $MainWindowWidth)
@@ -209,7 +200,7 @@ Function ParallaxStarfield()
 
 Function 3DStarfield()
 {
-	ForEach ($i in 0..($MaxStars3D - 1))
+	For ($i=0; $i -lt $MaxStars3D; $i++)
 	{
 		$Stars3DZ[$i] -= 0.19
 
@@ -356,7 +347,7 @@ Function Rasterbars($Runtime)
 	Set-Variable RBMinY -Option Constant -Value 150
 
 	# Pre-draw rasterbars in matching bitmaps
-	ForEach ($i in 0..8)
+	For ($i=0; $i -lt 9; $i++)
 	{
 		$Spacing = $i * 5
 		$RBPen.Color = [Drawing.Color]::FromArgb($RB1Colors[$i][0],$RB1Colors[$i][1],$RB1Colors[$i][2])
@@ -462,7 +453,7 @@ Function Plasma($Runtime)
 
 	# Init Plasma
 	Set-Variable PlasmaWidth -Option Constant -Value $MainWindowWidth
-	Set-Variable PlasmaHeight -Option Constant -Value 295
+	Set-Variable PlasmaHeight -Option Constant -Value 293
 	Set-Variable PlasmaSpacing -Option Constant -Value 5
 	$PlasmaCount1 		 = 5
 	$PlasmaCount2 		 = 125
@@ -503,8 +494,17 @@ Function Plasma($Runtime)
 
 		$Plasmagfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,1,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
@@ -522,8 +522,8 @@ Function FilledVectorCube($Runtime)
 	# Init Vectorcube
 	$CubeX 				= @{}
 	$CubeY 				= @{}
-	Set-Variable CenterX -Option Constant -Value ($MainWindowWidth / 2)
-	Set-Variable CenterY -Option Constant -Value ($MainWindowHeight / 2)
+	Set-Variable CenterX -Option Constant -Value ($MainWindowWidth -shr 1)
+	Set-Variable CenterY -Option Constant -Value ($MainWindowHeight -shr 1)
 	$CubeFaceBrushes 	= @{}
 	$CubeFaceColors		= @([System.Drawing.Color]::FromArgb(185,242,145),[System.Drawing.Color]::FromArgb(80,191,148),[System.Drawing.Color]::FromArgb(94,89,89),
 							[System.Drawing.Color]::FromArgb(247,35,73),[System.Drawing.Color]::FromArgb(255,132,94),[System.Drawing.Color]::FromArgb(246,220,133))
@@ -540,7 +540,7 @@ Function FilledVectorCube($Runtime)
 	$Points				= @{}
 
 
-	ForEach ($i in 0..$CubeNumFaces)
+	For ($i=0; $i -le $CubeNumFaces; $i++)
 	{
  	  	$CubeFaceBrushes[$i] = New-Object Drawing.SolidBrush($CubeFaceColors[$i])
 	}
@@ -554,7 +554,7 @@ Function FilledVectorCube($Runtime)
 		$Buffer.DrawImage($Background,0,150)
 
 		# Filled VectorCube
-		ForEach ($i in 0..7)
+		For ($i=0; $i -lt 8; $i++)
 		{
 			# x-rotation
 			$y = $CubeDef[$i][1]
@@ -575,13 +575,13 @@ Function FilledVectorCube($Runtime)
 		}
 
 		# selection-sort of depth/faces
-		ForEach ($i in 0..$CubeNumFaces)
+		For ($i=0; $i -le $CubeNumFaces; $i++)
 		{
 			$avgZ[$i] = ($CubeDef[$CubeFaces[$i][0]][2] + $CubeDef[$CubeFaces[$i][1]][2] + $CubeDef[$CubeFaces[$i][2]][2] + $CubeDef[$CubeFaces[$i][3]][2]) -shr 2
 			$Order[$i] = $i
   		}
 
-		ForEach ($i in 0..($CubeNumFaces - 1))
+		For ($i=0; $i -lt $CubeNumFaces; $i++)
 		{
 	       	$Min = $i
 		    For ($j = $i + 1; $j -le $CubeNumFaces; ++$j)
@@ -596,7 +596,7 @@ Function FilledVectorCube($Runtime)
    	        $Order[$i], $Order[$Min] = $Order[$Min], $Order[$i]
  	    }
 
-		ForEach ($i in 0..$CubeNumFaces)
+		For ($i=0; $i -le $CubeNumFaces; $i++)
 		{
 			$Points = @((New-Object Drawing.Point($CubeX[$CubeFaces[$Order[$i]][0]],$CubeY[$CubeFaces[$Order[$i]][0]])),(New-Object Drawing.Point($CubeX[$CubeFaces[$Order[$i]][1]],$CubeY[$CubeFaces[$Order[$i]][1]])),(New-Object Drawing.Point($CubeX[$CubeFaces[$Order[$i]][2]],$CubeY[$CubeFaces[$Order[$i]][2]])),(New-Object Drawing.Point($CubeX[$CubeFaces[$Order[$i]][3]],$CubeY[$CubeFaces[$Order[$i]][3]])))
         	$Buffer.FillPolygon($CubeFaceBrushes[$Order[$i]],$Points)
@@ -637,9 +637,9 @@ Function Fire($Runtime)
 	        $Firegfx.SetPixel($RandomNumber + 1,$FireHeight - 1,"Red")
  	   }
 
-		ForEach ($y in 1..($FireHeight - 1))
+		For ($y=1; $y -lt $FireHeight; ++$y)
  	    {
-			ForEach ($x in 0..($FireWidth - 1))
+			For ($x=0; $x -lt $FireWidth; ++$x)
   		    {
 				If (($Random.Next() -band 31) -eq 0)
 				{
@@ -660,8 +660,17 @@ Function Fire($Runtime)
 		$Firegfx.Release()
 		$Buffer.DrawImage($FireChunky,0,151,$MainWindowWidth,291)
 
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
 		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
@@ -679,8 +688,8 @@ Function Rotozoomer($Runtime)
 	# Init Rotozoomer
 	$RotoZoomer	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\RotoZoomer.png")
 	$RotoAngle	= 0
-	Set-Variable RotoXPos -Option Constant -Value ($MainWindowWidth / 2)
-	Set-Variable RotoYPos -Option Constant -Value ( $MainWindowHeight / 2)
+	Set-Variable RotoXPos -Option Constant -Value ($MainWindowWidth -shr 1)
+	Set-Variable RotoYPos -Option Constant -Value ( $MainWindowHeight -shr 1)
 	Set-Variable RotoHalfX -Option Constant -Value ($RotoZoomer.Width / -2)
 	Set-Variable RotoHalfY -Option Constant -Value ($RotoZoomer.Height / -2)
 	Set-Variable RotoWidth -Option Constant -Value $RotoZoomer.Width
@@ -758,12 +767,14 @@ Function SineScroller($Runtime)
 	$Bob1 			= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\Bob1.png")
 	$Bob2 			= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\Bob2.png")
 
-	ForEach ($i in 0..511)
+	For ($i=0; $i -lt 512; $i++)
 	{
-		$BobXCoord1[$i] = [System.Math]::Sin(($i * 0.703125) * 0.0174532) * (600 -shr 1) + (600 -shr 1)
-		$BobYCoord1[$i] = [System.Math]::Cos(($i * 0.703125) * 0.0174532) * (300 -shr 1) + (300 -shr 1)
-		$BobXCoord2[$i] = [System.Math]::Cos(($i * 0.703125) * 0.0174532) * (600 -shr 1) + (600 -shr 1)
-		$BobYCoord2[$i] = [System.Math]::Sin(($i * 0.703125) * 0.0174532) * (300 -shr 1) + (300 -shr 1)
+		$TempCalc = ($i * 0.703125) * 0.0174532
+		
+		$BobXCoord1[$i] = [System.Math]::Sin($TempCalc) * 300 + 300
+		$BobYCoord1[$i] = [System.Math]::Cos($TempCalc) * 150 + 150
+		$BobXCoord2[$i] = [System.Math]::Cos($TempCalc) * 300 + 300
+		$BobYCoord2[$i] = [System.Math]::Sin($TempCalc) * 150 + 150
 	}
 
 	Do
@@ -777,11 +788,11 @@ Function SineScroller($Runtime)
 		# Sine Scroller
 		$sx = $ScrollX
 
-		ForEach ($i in 0..($ScrollTextLength - 1))
+		For ($i=0; $i -lt $ScrollTextLength; $i++)
 		{
 			$CharX = 0
 
-			ForEach ($j in 0..41)
+			For ($j=0; $j -lt 42; $j++)
 			{
 				If ($ScrollText[$i] -eq $ScrollCharMap[$j] -and $sx -lt $MainWindowWidth -and $sx -gt -$ScrollCharW)
 				{
@@ -802,7 +813,7 @@ Function SineScroller($Runtime)
 		}
 
 		# Bobs
-		ForEach ($i in 0..$MaxBobs)
+		For ($i=0; $i -le $MaxBobs; $i++)
 		{
 			$Buffer.DrawImage($Bob1,$BobXCoord1[$BobA -band 511] + 80,$BobYCoord1[$BobB -band 511] + 100)
 			$Buffer.DrawImage($Bob2,$BobXCoord2[$BobA + 512 -band 511] + 80,$BobYCoord2[$BobB + 512 -band 511] + 100)
@@ -831,13 +842,13 @@ Function Tunnel($Runtime)
 	Set-Variable TunnelTextureSize -Option Constant -Value 256
 	Set-Variable TunnelScreenWidth -Option Constant -Value 128
 	Set-Variable TunnelScreenHeight -Option Constant -Value 64
-	$TunnelDistance 			= New-Object 'object[,]' ($TunnelScreenWidth * 2), ($TunnelScreenHeight * 2)
-	$TunnelAngle    			= New-Object 'object[,]' ($TunnelScreenWidth * 2), ($TunnelScreenHeight * 2)
+	$TunnelDistance 			= New-Object 'object[,]' ($TunnelScreenWidth -shl 1), ($TunnelScreenHeight -shl 1)
+	$TunnelAngle    			= New-Object 'object[,]' ($TunnelScreenWidth -shl 1), ($TunnelScreenHeight -shl 1)
 	$TunnelSpeedX 		= 2.15
 	$TunnelSpeedY 		= 2.15
 	$TunnelAnim		= 0
-	Set-Variable TunnelWidth -Option Constant -Value ($TunnelScreenWidth / 2)
-	Set-Variable TunnelHeight -Option Constant -Value ($TunnelScreenHeight / 2)
+	Set-Variable TunnelWidth -Option Constant -Value ($TunnelScreenWidth -shr 1)
+	Set-Variable TunnelHeight -Option Constant -Value ($TunnelScreenHeight -shr 1)
 	$TunnelChunky				= New-Object System.Drawing.Bitmap($TunnelScreenWidth,$TunnelScreenHeight)
 	$Tunnelgfx 					= New-Object $Chunky($TunnelChunky)
 	$TextureBMP			 		= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\TunnelTexture.png")
@@ -847,9 +858,9 @@ Function Tunnel($Runtime)
 	$TTgfx.Lock()
 
 	# Generate distance and angle tables for tunnel
-	ForEach ($x in 0..($TunnelScreenWidth * 2 - 1))
+	For ($x=0; $x -le (($TunnelScreenWidth -shl 1) - 1); $x++)
 	{
-		ForEach ($y in 0..($TunnelScreenHeight * 2 - 1))
+		For ($y=0; $y -le (($TunnelScreenHeight -shl 1) - 1); $y++)
 		{
  	 	  	$TunnelDistance[$x,$y] = [int] (32.0 * $TunnelTextureSize / [System.Math]::Sqrt(($x - $TunnelScreenWidth) * ($x - $TunnelScreenWidth) + ($y - $TunnelScreenHeight) * ($y - $TunnelScreenHeight))) -band ($TunnelTextureSize-1)
 			$AngleTemp = (0.5 * $TunnelTextureSize * [System.Math]::ATan2($y - $TunnelScreenHeight, $x - $TunnelScreenWidth) / $PI)
@@ -877,9 +888,9 @@ Function Tunnel($Runtime)
 		$LX = [int] ($TunnelWidth * [System.Math]::Cos($TunnelAnim * 4.0)) + $TunnelWidth
 		$LY = [int] ($TunnelHeight * [System.Math]::Sin($TunnelAnim * 6.0)) + $TunnelHeight
 
-		ForEach ($y in 0..($TunnelScreenHeight - 1))
+		For ($y=0; $y -lt $TunnelScreenHeight; $y++)
 		{
-			ForEach ($x in 0..($TunnelScreenWidth - 1))
+			For ($x=0; $x -lt $TunnelScreenWidth; $x++)
 			{
 				$Color = $TTgfx.GetPixel((($TunnelDistance[($x + $LX),($y + $LY)] + $SX) -band 255),(($TunnelAngle[($x + $LX),($y + $LY)] + $SY) -band 255))
 				$Tunnelgfx.SetChunk($Color)
@@ -890,8 +901,17 @@ Function Tunnel($Runtime)
 
 		$Buffer.DrawImage($TunnelChunky,0,150,$MainWindowWidth,295)
 
-		$Buffer.DrawLine($WhiteLinePen,1,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
@@ -953,9 +973,9 @@ Function Metaballs($Runtime)
 		$MetaB3y += $MetaB3yvel
 		If ($MetaB3y -gt $MetaballsHeight -or $MetaB3y -lt 0 ) { $MetaB3yvel *= -1 }
 
-		ForEach ($y in 0..($MetaballsHeight - 1))
+		For ($y=0; $y -lt $MetaballsHeight; $y++)
 		{
-        	ForEach ($x in 0..($MetaballsWidth - 1))
+        	For ($x=0; $x -lt $MetaballsWidth; $x++)
          	{
 				$BallSum = 0.3 / [System.Math]::Sqrt(($x - $MetaB1x) * ($x - $MetaB1x) + ($y - $MetaB1y) * ($y - $MetaB1y))
                 $BallSum += 0.3 / [System.Math]::Sqrt(($x - $MetaB2x) * ($x - $MetaB2x) + ($y - $MetaB2y) * ($y - $MetaB2y))
@@ -980,8 +1000,17 @@ Function Metaballs($Runtime)
 
 		$Buffer.DrawImage($MetaballsChunky,0,150,$MainWindowWidth,295)
 
-		$Buffer.DrawLine($WhiteLinePen,1,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
@@ -1037,11 +1066,11 @@ Function DotTunnel($Runtime)
 			$Warp -= $DepthAdd * 60
 		}
 
-		ForEach ($j in 0..($DotTunnelRings - 1))
+		For ($j=0; $j -lt $DotTunnelRings; $j++)
 		{
  	        $SinA = 260 * [System.Math]::Sin($Factor * $DotTunnelRAD2DEG)
 
-			For ($i = 360; $i -ge 0; $i -= $DotTunnelSpace)
+			For ($i=360; $i -ge 0; $i-=$DotTunnelSpace)
 			{
 				$Calc = $DotTunnelRAD2DEG * ($i + $DotTunnelAdd)
 				$x = [int] (($RadY1 * [System.Math]::Sin($Calc) + $SinA) / $Depth) + $DotTunnelCenterX
@@ -1059,8 +1088,17 @@ Function DotTunnel($Runtime)
 
 		$DotTunnelgfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,1,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
@@ -1110,7 +1148,7 @@ Function VectorBalls($Runtime)
 		$CosZ = [System.Math]::Cos($AngleZTemp)
 		$SinZ = [System.Math]::Sin($AngleZTemp)
 
-		ForEach ($i in 0..$VectorBallsNum)
+		For ($i=0; $i -le $VectorBallsNum; $i++)
 		{
 			# x-rotation
     		$z2 = $VectorBallsDefY[$i] * $SinX + $VectorBallsDefZ[$i] * $CosX
@@ -1126,7 +1164,7 @@ Function VectorBalls($Runtime)
   		}
 
 		# Selection sort of z/depth
-		ForEach ($i in 0..$VectorBallsNum)
+		For ($i=0; $i -le $VectorBallsNum; $i++)
 		{
 	       	$Min = $i
 		    For ($j = $i + 1; $j -le $VectorBallsNum; ++$j)
@@ -1142,7 +1180,7 @@ Function VectorBalls($Runtime)
         	$VectorBallsCoordZ[$Min], $VectorBallsCoordZ[$i] = $VectorBallsCoordZ[$i], $VectorBallsCoordZ[$Min]
 		}
 
-  		ForEach ($i in 0..$VectorBallsNum)
+  		For ($i=0; $i -le $VectorBallsNum; $i++)
 		{
     		$Factor = ($VectorBallsCoordZ[$i] + 15)
 			$Buffer.DrawImage($VectorBallsBob, ($VectorBallsCoordX[$i] * 2 * $Factor + 220) + 150, ($VectorBallsCoordY[$i] * 2 * $Factor + 180) + 80, $Factor * 3, $Factor * 3)
@@ -1223,9 +1261,9 @@ Function Landscape($Runtime)
 		$CosA = [int]([System.Math]::Cos($FactorTemp) * 128)
 		$SinA = [int]([System.Math]::Sin($FactorTemp) * 128)
 
-		ForEach ($x in 0..$LandscapeTextureSize)
+		For ($x=0; $x -le $LandscapeTextureSize; $x++)
  		{
-  			ForEach ($z in 0..$LandscapeTextureSize)
+  			For ($z=0; $z -le $LandscapeTextureSize; $z++)
     		{
 				$tempX = (($x - $XPos) * $CosA - ($z - $ZPos) * $SinA)
     			$tempY = (($LandscapeTerrainMap.GetPixel($x,$z).R) -shr 2) - $YPos
@@ -1238,8 +1276,17 @@ Function Landscape($Runtime)
 
 		$Landscapegfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,1,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
 		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
 
 		FPSCounter
 
