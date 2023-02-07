@@ -114,7 +114,8 @@ $Background	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\Backgrou
 #########################################
 # Establish Audio Player and load Audio #
 #########################################
-$AudioPlayer=New-Object System.Windows.Media.MediaPlayer 
+$AudioPlayer=New-Object System.Windows.Media.MediaPlayer
+
 Do
 {
    	$AudioPlayer.Open($localScriptRoot + "\Audio\Audio1.mp3")
@@ -122,6 +123,7 @@ Do
    	$AudioDuration = $AudioPlayer.NaturalDuration.TimeSpan.TotalMilliseconds
 }
 Until ($AudioDuration)
+
 $AudioPlayer.Volume=1
 
 ###########################
@@ -239,6 +241,30 @@ Function FPSCounter()
 
 	++$script:FPSFrames
 	$Buffer.DrawString("$FPS fps",$FPSFont,$FPSBrush,$FPSPosX,$FPSPosY)
+}
+
+Function ComposeScreen($Drawlines)
+{
+	if ($Drawlines -eq $true)
+	{
+		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
+		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
+		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
+		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
+		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+
+		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
+		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
+		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
+		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
+		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
+	}
+
+	FPSCounter
+
+	# Render to screen
+	$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
+	Start-Sleep -Milliseconds 0.01
 }
 
 #endregion
@@ -438,12 +464,10 @@ Function Rasterbars($Runtime)
 
 		$Buffer.DrawImage($RB3BMP,0,$RBParams[2][0])
 
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
+
+	$LogoImage.Release()
 }
 
 # 3D Starfield, Plasma
@@ -494,23 +518,7 @@ Function Plasma($Runtime)
 
 		$Plasmagfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
-
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
 }
 
@@ -602,11 +610,7 @@ Function FilledVectorCube($Runtime)
         	$Buffer.FillPolygon($CubeFaceBrushes[$Order[$i]],$Points)
 		}
 
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
 }
 
@@ -660,23 +664,7 @@ Function Fire($Runtime)
 		$Firegfx.Release()
 		$Buffer.DrawImage($FireChunky,0,151,$MainWindowWidth,291)
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
-
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
 }
 
@@ -729,12 +717,10 @@ Function Rotozoomer($Runtime)
 		# Draw rotated image to buffer
 		$Buffer.DrawImage($Out,$RotoXPos - $RotoWidth - 50,$RotoYPos - $Rotoheight + 50,800,600)
 
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
+
+	$RotoZoomer.Release()
 }
 
 # Parallax Starfield, Bobs and SineScroller
@@ -770,7 +756,7 @@ Function SineScroller($Runtime)
 	For ($i=0; $i -lt 512; $i++)
 	{
 		$TempCalc = ($i * 0.703125) * 0.0174532
-		
+
 		$BobXCoord1[$i] = [System.Math]::Sin($TempCalc) * 300 + 300
 		$BobYCoord1[$i] = [System.Math]::Cos($TempCalc) * 150 + 150
 		$BobXCoord2[$i] = [System.Math]::Cos($TempCalc) * 300 + 300
@@ -825,12 +811,12 @@ Function SineScroller($Runtime)
 		$BobA += 8
 		$BobB += 10
 
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
+
+	$ScrollCharPNG.Release()
+	$Bob1.Release()
+	$Bob2.Release()
 }
 
 # 3D Starfield, Tunnel
@@ -901,24 +887,10 @@ Function Tunnel($Runtime)
 
 		$Buffer.DrawImage($TunnelChunky,0,150,$MainWindowWidth,295)
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
-
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
+
+	$TextureBMP.Release()
 }
 
 # Parallax Starfield, Metaballs 2D
@@ -1000,23 +972,7 @@ Function Metaballs($Runtime)
 
 		$Buffer.DrawImage($MetaballsChunky,0,150,$MainWindowWidth,295)
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
-
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
 }
 
@@ -1088,23 +1044,7 @@ Function DotTunnel($Runtime)
 
 		$DotTunnelgfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
-
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
 }
 
@@ -1190,12 +1130,10 @@ Function VectorBalls($Runtime)
 		$AngleY += 4
 		$AngleZ += 3
 
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
+		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
+
+	$VectorBallsBob.Release()
 }
 
 
@@ -1276,23 +1214,8 @@ Function Landscape($Runtime)
 
 		$Landscapegfx.Release()
 
-		$Buffer.DrawLine($WhiteLinePen,0,151,$MainWindowWidth,151)
-		$Buffer.DrawLine($WhiteLinePen,0,152,$MainWindowWidth,152)
-		$Buffer.DrawLine($WhiteLinePen,0,153,$MainWindowWidth,153)
-		$Buffer.DrawLine($WhiteLinePen,0,154,$MainWindowWidth,154)
-		$Buffer.DrawLine($WhiteLinePen,0,155,$MainWindowWidth,155)
+		ComposeScreen($true)
 
-		$Buffer.DrawLine($WhiteLinePen,0,441,$MainWindowWidth,441)
-		$Buffer.DrawLine($WhiteLinePen,0,442,$MainWindowWidth,442)
-		$Buffer.DrawLine($WhiteLinePen,0,443,$MainWindowWidth,443)
-		$Buffer.DrawLine($WhiteLinePen,0,444,$MainWindowWidth,444)
-		$Buffer.DrawLine($WhiteLinePen,0,445,$MainWindowWidth,445)
-
-		FPSCounter
-
-		# Render to screen
-		$GDI.DrawImage($BufferBMP,0,0,$MainWindowWidth,$MainWindowHeight)
-		Start-Sleep -Milliseconds 0.01
 	} Until ($Timer -ge $StopTime)
 
 	$LandscapeTextureMap.Release()
