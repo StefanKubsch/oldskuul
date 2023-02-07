@@ -55,10 +55,11 @@ $GetKey = Add-Type -MemberDefinition $ImportGetAsyncKeyState -Name 'Win32' -Pass
 Set-Variable MainWindowWidth -Option Constant -Value 800
 Set-Variable MainWindowHeight -Option Constant -Value 600
 
+Set-Variable PartsRuntime -Option Constant -Value 10000
+
 $ClearColor = [System.Drawing.Color]::FromArgb(12,6,63)
 # "WhiteLinePen" is used for drawing lines in parts not using the "Background" image
 $WhiteLinePen = New-Object System.Drawing.Pen White
-Set-Variable WhiteLinePen.Color -Option Constant -Value "White"
 Set-Variable WhiteLinePen.Width	-Option Constant -Value 0f
 # Use System.Random function (.NET) since it´s a bit faster than the Get-Random cmdlet (Powershell)
 $Random = New-Object System.Random
@@ -115,16 +116,16 @@ $Background	= [System.Drawing.Image]::Fromfile($localScriptRoot + "\GFX\Backgrou
 # Establish Audio Player and load Audio #
 #########################################
 $AudioPlayer=New-Object System.Windows.Media.MediaPlayer
+$AudioPlayer.Open($localScriptRoot + "\Audio\Audio1.mp3")
 
 Do
 {
-   	$AudioPlayer.Open($localScriptRoot + "\Audio\Audio1.mp3")
-	Start-Sleep -Seconds 2
+	Start-Sleep -Seconds 0.5
    	$AudioDuration = $AudioPlayer.NaturalDuration.TimeSpan.TotalMilliseconds
 }
 Until ($AudioDuration)
 
-$AudioPlayer.Volume=1
+$AudioPlayer.Volume=0.5
 
 ###########################
 # Init Parallax Starfield #
@@ -467,7 +468,7 @@ Function Rasterbars($Runtime)
 		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
 
-	$LogoImage.Release()
+	$LogoImage.Dispose()
 }
 
 # 3D Starfield, Plasma
@@ -592,6 +593,7 @@ Function FilledVectorCube($Runtime)
 		For ($i=0; $i -lt $CubeNumFaces; $i++)
 		{
 	       	$Min = $i
+
 		    For ($j = $i + 1; $j -le $CubeNumFaces; ++$j)
 			{
             	If ($avgZ[$j] -lt $avgZ[$Min])
@@ -720,7 +722,7 @@ Function Rotozoomer($Runtime)
 		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
 
-	$RotoZoomer.Release()
+	$RotoZoomer.Dispose()
 }
 
 # Parallax Starfield, Bobs and SineScroller
@@ -814,9 +816,9 @@ Function SineScroller($Runtime)
 		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
 
-	$ScrollCharPNG.Release()
-	$Bob1.Release()
-	$Bob2.Release()
+	$ScrollCharPNG.Dispose()
+	$Bob1.Dispose()
+	$Bob2.Dispose()
 }
 
 # 3D Starfield, Tunnel
@@ -830,8 +832,8 @@ Function Tunnel($Runtime)
 	Set-Variable TunnelScreenHeight -Option Constant -Value 64
 	$TunnelDistance 			= New-Object 'object[,]' ($TunnelScreenWidth -shl 1), ($TunnelScreenHeight -shl 1)
 	$TunnelAngle    			= New-Object 'object[,]' ($TunnelScreenWidth -shl 1), ($TunnelScreenHeight -shl 1)
-	$TunnelSpeedX 		= 2.15
-	$TunnelSpeedY 		= 2.15
+	$TunnelSpeedX 	= 2.15
+	$TunnelSpeedY 	= 2.15
 	$TunnelAnim		= 0
 	Set-Variable TunnelWidth -Option Constant -Value ($TunnelScreenWidth -shr 1)
 	Set-Variable TunnelHeight -Option Constant -Value ($TunnelScreenHeight -shr 1)
@@ -890,7 +892,7 @@ Function Tunnel($Runtime)
 		ComposeScreen($true)
 	} Until ($Timer -ge $StopTime)
 
-	$TextureBMP.Release()
+	$TextureBMP.Dispose()
 }
 
 # Parallax Starfield, Metaballs 2D
@@ -1133,7 +1135,7 @@ Function VectorBalls($Runtime)
 		ComposeScreen($false)
 	} Until ($Timer -ge $StopTime)
 
-	$VectorBallsBob.Release()
+	$VectorBallsBob.Dispose()
 }
 
 
@@ -1220,6 +1222,9 @@ Function Landscape($Runtime)
 
 	$LandscapeTextureMap.Release()
 	$LandscapeTerrainMap.Release()
+
+	$LandIMG.Dispose()
+	$LandscapeTextureIMG.Dispose()
 }
 
 #endregion
@@ -1234,17 +1239,17 @@ IntroText
 
 while ($true)
 {
-	Rasterbars(10000)				# Parallax Starfield, Rasterbars & Bouncing Logo
-	Plasma(10000)					# 3D Starfield, Plasma
-	SineScroller(10000)				# Parallax Starfield, Bobs and SineScroller
-	FilledVectorCube(10000)			# 3D Starfield and FilledVectorCube
-	Fire(10000)						# Parallax Starfield, Fire
-	Rotozoomer(10000)				# 3D Starfield and RotoZoomer
-	Metaballs(10000)				# Parallax Starfield, Metaballs 2D
-	Tunnel(10000)					# 3D Starfield, Tunnel
-	Landscape(10000)				# Parallax Starfield, Landscape
-	VectorBalls(10000)				# 3D Starfield, Vectorballs
-	DotTunnel(10000)				# Parallax Starfield, DotTunnel
+	Rasterbars($PartsRuntime)				# Parallax Starfield, Rasterbars & Bouncing Logo
+	Plasma($PartsRuntime)					# 3D Starfield, Plasma
+	SineScroller($PartsRuntime)				# Parallax Starfield, Bobs and SineScroller
+	FilledVectorCube($PartsRuntime)			# 3D Starfield and FilledVectorCube
+	Fire($PartsRuntime)						# Parallax Starfield, Fire
+	Rotozoomer($PartsRuntime)				# 3D Starfield and RotoZoomer
+	Metaballs($PartsRuntime)				# Parallax Starfield, Metaballs 2D
+	Tunnel($PartsRuntime)					# 3D Starfield, Tunnel
+	Landscape($PartsRuntime)				# Parallax Starfield, Landscape
+	VectorBalls($PartsRuntime)				# 3D Starfield, Vectorballs
+	DotTunnel($PartsRuntime)				# Parallax Starfield, DotTunnel
 }
 
 #endregion
