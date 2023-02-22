@@ -185,6 +185,7 @@ Function ParallaxStarfield()
 	For ($i=0; $i -lt $MaxStarsPX; $i++)
 	{
 		$StarsPXX[$i] += $StarsPXZ[$i]
+
 		If ($StarsPXX[$i] -ge $MainWindowWidth)
 		{
    	 		$StarsPXX[$i] = 0
@@ -282,7 +283,7 @@ Function IntroText()
 						(">_ps:oldskuul",300,500,10,250,0,0))
 	$IntroFont		= New-Object System.Drawing.Font("Calibri",60)
 
-	ForEach ($i in 0..4)
+	for ($i=0; $i -le 4; $i++)
 	{
 		$R1 = 12
 		$R = 12
@@ -298,7 +299,7 @@ Function IntroText()
 
 		Start-Sleep -Milliseconds $IntroTextArray[$i][3]
 
-		ForEach ($j in 0..127)
+		for ($j=0; $j -lt 128; $j++)
 		{
 				If ($R1 -lt $IntroTextArray[$i][4]) { $R1 += 2 }
 				If ($G1 -lt $IntroTextArray[$i][5]) { $G1 += 2 }
@@ -317,7 +318,7 @@ Function IntroText()
 	$bgB = 63
 	$B = 63
 
-	ForEach ($i in 0..49)
+	for ($i=0; $i -lt 50; $i++)
 	{
 		If ($bgR -lt 250) { $bgR += 5 }
 		If ($bgG -lt 250) { $bgG += 5 }
@@ -325,7 +326,7 @@ Function IntroText()
 
 		$Buffer.Clear([System.Drawing.Color]::FromArgb($bgR,$bgG,$bgB))
 
-		ForEach ($j in 0..4)
+		for ($j=0; $j -lt 5; $j++)
 		{
 			If ($j -eq 4)
 			{
